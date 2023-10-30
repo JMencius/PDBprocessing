@@ -1,5 +1,7 @@
+# define three functions
+
+# function purpose: read all the heavy atom coordinate from pdb file
 def read_pdb_file(filename : str) -> dict:
-    # function purpose: read all the heavy atom coordinate from pdb file
     heavy_atom = dict()
     res_id = None
     each_res = list()
@@ -26,6 +28,7 @@ def read_pdb_file(filename : str) -> dict:
     return heavy_atom
 
 
+# function purpose: calculate min distance between residue pairs using heavy atoms
 def cal_distance(list1 : list, list2 : list) -> float:
     x1, y1, z1 = list1
     x2, y2, z2 = list2
@@ -45,12 +48,13 @@ def cal_min_distance(res1 : list, res2 : list) -> float:
     return min_distance
     
 
-
+# an axample of functions usage
 if __name__ == "__main__":
-    heavy_atom = read_pdb_file("assemble_11313233.pdb")
-    print(f"There are {len(heavy_atom.keys())} residues")
+    heavy_atom = read_pdb_file("assemble_11313233.pdb") # assemble_11313233.pdb is an example file
+    residue_No = len(heavy_atom.keys())
+    print(f"There are {residue_No} residues")
     
-    cutoff = 5
+    cutoff = 5 # distance cutoff to evaluate contact of residue pairs
     fit_cutoff_pair = set()
     for i in heavy_atom.keys():
         for j in heavy_atom.keys():
@@ -62,7 +66,31 @@ if __name__ == "__main__":
     temp_list = list(fit_cutoff_pair)
     temp_list.sort(key = lambda K : K[0])
 
-    print(temp_list)            
+# convert contact list to 1/0 encoded matrix
+    
+    mat = np.zeros((residue_No, residue_No))
+
+    for index in temp_list:
+        x = index[0] - 1
+        y = index[1] - 1
+        mat[x, y] = 1
+        mat[y, x] = 1
+
+# draw ContactMap  
+    import seaborn as sns
+
+    sns.set_context("paper")
+    sns.set_style("white")
+    plt.close('all')
+
+    plt.figure(figsize = (4, 4))
+    sns.heatmap(mat, cmap = 'Greys_r', cbar = False)
+
+    plt.savefig('ContactMap1.png', dpi = 450)      
+
+
+
+
 
 
 
